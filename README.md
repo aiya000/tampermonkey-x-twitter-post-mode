@@ -16,7 +16,7 @@ Toggle between Post Mode and the original page with a fixed button in the bottom
 
 | Post Mode (`/home`) | Post Mode (`/{profile}`) |
 |---|---|
-| Only the compose box | Profile info + injected Post button |
+| ![](./readme/desktop-home.png) | ![](./readme/desktop-profile.png) |
 
 ## Installation
 
