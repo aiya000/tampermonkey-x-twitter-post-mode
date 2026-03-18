@@ -18,6 +18,9 @@ Toggle between Post Mode and the original page with a fixed button in the bottom
 |---|---|
 | ![](./readme/desktop-home.png) | ![](./readme/desktop-profile.png) |
 
+Smartphone view (Post Mode on `/{profile}`):
+![](./readme/smartphone-profile.png)
+
 ## Installation
 
 1. Install [Tampermonkey](https://www.tampermonkey.net/) in your browser.
