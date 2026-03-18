@@ -40,11 +40,15 @@
 
     /* ── Injected post button on profile pages ── */
     #xpm-post-btn {
+      position: fixed;
+      top: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2147483646;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      margin: 20px auto 16px;
       padding: 14px 32px;
       background: #1d9bf0;
       color: #fff;
@@ -57,8 +61,8 @@
       transition: background 0.15s ease, transform 0.15s ease;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     }
-    #xpm-post-btn:hover  { background: #1a8cd8; transform: scale(1.02); }
-    #xpm-post-btn:active { transform: scale(0.97); }
+    #xpm-post-btn:hover  { background: #1a8cd8; transform: scale(1.02) translateX(-50%); }
+    #xpm-post-btn:active { transform: scale(0.97) translateX(-50%); }
 
     /* ── Common: elements always hidden in post mode ── */
 
@@ -103,6 +107,11 @@
     }
 
     /* ── /profile specific ── */
+
+    /* Prevent scrollbar from changing size due to virtualized timeline height updates */
+    body.xpm-active.xpm-profile {
+      overflow: hidden !important;
+    }
 
     /* Hide sticky column header (username + post count bar at the very top) */
     body.xpm-active.xpm-profile [data-testid="primaryColumn"] > div > div:first-child {
@@ -306,31 +315,9 @@
     if (document.getElementById('xpm-post-btn') !== null) {
       return
     }
-
-    const primaryColumn = document.querySelector('[data-testid="primaryColumn"]')
-    if (primaryColumn === null) {
-      return
-    }
-
-    // The tab bar sits in a container just after the profile info section.
-    // Insert the Post button right before the tablist (or its nearest div parent).
-    const tabList = primaryColumn.querySelector('[role="tablist"]')
-    if (!tabList) {
-      return // wait until React renders the tab bar
-    }
-
-    const postButton = createPostButton()
-    // Walk up from the tablist to find the direct child of primaryColumn's inner div,
-    // then insert the Post button just before that container (= where the tabs live).
-    const inner = primaryColumn.querySelector(':scope > div')
-    if (inner === null) {
-      return
-    }
-    let anchor = tabList
-    while (anchor.parentElement && anchor.parentElement !== inner) {
-      anchor = anchor.parentElement
-    }
-    inner.insertBefore(postButton, anchor)
+    // Append directly to body (outside React's DOM tree) so React can never remove it.
+    // The button uses position:fixed and does not affect document layout or scrollbar.
+    document.body.appendChild(createPostButton())
   }
 
   function removeProfilePostButton() {
