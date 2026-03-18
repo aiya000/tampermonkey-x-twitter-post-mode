@@ -14,42 +14,6 @@
 ;(function () {
   'use strict'
 
-  const storageKey = 'x_post_mode_active'
-  let postModeActive = GM_getValue(storageKey, true) // default: post mode ON
-
-  function getPageType() {
-    const path = location.pathname
-    if (path === '/home' || path === '/') {
-      return 'home'
-    }
-    if (path.startsWith('/compose')) {
-      return 'compose'
-    }
-
-    const reservedPaths = [
-      '/explore',
-      '/notifications',
-      '/messages',
-      '/bookmarks',
-      '/lists',
-      '/settings',
-      '/i/',
-      '/search',
-      '/jobs'
-    ]
-    if (reservedPaths.some(p => path.startsWith(p))) {
-      return 'other'
-    }
-
-    // Anything like /{username}[/...] is treated as a profile page
-    if (/^\/[A-Za-z0-9_]+/.test(path)) {
-      return 'profile'
-    }
-
-    return 'other'
-  }
-
-  // ── Styles ─────────────────────────────────────────────────────────────────
   GM_addStyle(`
     /* ── Toggle button ── */
     #xpm-toggle-btn {
@@ -205,8 +169,44 @@
     }
   `)
 
-  // ── Icons ──────────────────────────────────────────────────────────────────
-  const ICON_POST_MODE = `
+  const storageKey = 'x_post_mode_active'
+
+  /** @type {boolean} */
+  let postModeActive = GM_getValue(storageKey, true) // default: post mode ON
+
+  function getPageType() {
+    const path = location.pathname
+    if (path === '/home' || path === '/') {
+      return 'home'
+    }
+    if (path.startsWith('/compose')) {
+      return 'compose'
+    }
+
+    const reservedPaths = [
+      '/explore',
+      '/notifications',
+      '/messages',
+      '/bookmarks',
+      '/lists',
+      '/settings',
+      '/i/',
+      '/search',
+      '/jobs'
+    ]
+    if (reservedPaths.some(p => path.startsWith(p))) {
+      return 'other'
+    }
+
+    // Anything like /{username}[/...] is treated as a profile page
+    if (/^\/[A-Za-z0-9_]+/.test(path)) {
+      return 'profile'
+    }
+
+    return 'other'
+  }
+
+  const postModeIcon = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="52" height="52">
       <circle cx="24" cy="24" r="24" fill="#1d9bf0"/>
       <path d="M30 10 L38 18 L18 38 H10 V30 Z" fill="white"/>
@@ -214,7 +214,7 @@
     </svg>
   `
 
-  const ICON_FULL_MODE = `
+  const originalModeIcon = `
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="52" height="52">
       <circle cx="24" cy="24" r="24" fill="#536471"/>
       <rect x="12" y="14" width="24" height="4" rx="2" fill="white"/>
@@ -223,148 +223,166 @@
     </svg>
   `
 
-  // ── Toggle button ──────────────────────────────────────────────────────────
-  const toggleBtn = document.createElement('button')
-  toggleBtn.id = 'xpm-toggle-btn'
-  toggleBtn.setAttribute('type', 'button')
+  function createToggleButton() {
+    const button = document.createElement('button')
+    button.id = 'xpm-toggle-btn'
+    button.setAttribute('type', 'button')
+    button.addEventListener('click', () => {
+      postModeActive = !postModeActive
+      GM_setValue(storageKey, postModeActive)
+      applyMode()
+    })
+    return button
+  }
 
   function updateToggleButton() {
     if (postModeActive) {
-      toggleBtn.innerHTML = ICON_POST_MODE
-      toggleBtn.title = 'Switch to full view (currently: post mode)'
+      toggleButton.innerHTML = postModeIcon
+      toggleButton.title = 'Switch to full view (currently: post mode)'
     } else {
-      toggleBtn.innerHTML = ICON_FULL_MODE
-      toggleBtn.title = 'Switch to post mode (currently: full view)'
+      toggleButton.innerHTML = originalModeIcon
+      toggleButton.title = 'Switch to post mode (currently: full view)'
     }
   }
 
-  toggleBtn.addEventListener('click', () => {
-    postModeActive = !postModeActive
-    GM_setValue(storageKey, postModeActive)
-    applyMode()
-  })
+  const toggleButton = createToggleButton()
 
-  // ── Injected post button (profile pages only) ──────────────────────────────
-  function injectProfilePostButton() {
-    if (document.getElementById('xpm-post-btn')) {
-      return
-    }
-
-    const primaryCol = document.querySelector('[data-testid="primaryColumn"]')
-    if (!primaryCol) {
-      return
-    }
-
-    // The tab bar sits in a container just after the profile info section.
-    // Insert the Post button right before the tablist (or its nearest div parent).
-    const tabList = primaryCol.querySelector('[role="tablist"]')
-    if (!tabList) {
-      return // wait until React renders the tab bar
-    }
-
-    const postBtn = document.createElement('button')
-    postBtn.id = 'xpm-post-btn'
-    postBtn.type = 'button'
-    postBtn.innerHTML = `
+  function createPostButton() {
+    const postButton = document.createElement('button')
+    postButton.id = 'xpm-post-btn'
+    postButton.type = 'button'
+    postButton.innerHTML = `
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="20" height="20" fill="white">
         <path d="M23 3c-6.62-.1-10.38 2.421-13.05 6.03C7.29 12.61 6 17.331 6 22h2c0-1.007.07-2.013.19-3H12c4.1 0 7.48-2.53 7.94-6.16.096-.752.056-1.555-.188-2.248-.814-2.23-4.056-4.1-9.7-3.604C12.2 6.93 14.3 5 17.1 4.1L23 3z"/>
       </svg>
       Post
     `
-    postBtn.addEventListener('click', () => {
+    postButton.addEventListener('click', () => {
       // Try clicking the real (now hidden) compose button first,
       // fall back to navigating to /compose/tweet
-      const originalBtn = document.querySelector('[data-testid="SideNav_NewTweet_Button"]')
-      if (originalBtn) {
-        originalBtn.click()
+      const originalButton = document.querySelector('[data-testid="SideNav_NewTweet_Button"]')
+      if (originalButton) {
+        originalButton.click()
       } else {
         location.href = '/compose/tweet'
       }
     })
+    return postButton
+  }
 
+  /**
+    * Retries until React renders the tablist (tab bar appears after profile data loads)
+    */
+  function startTryingToInjectProfilePostButton() {
+    let attempts = 0
+
+    const tryInject = () => {
+      attempts++
+      if (document.getElementById('xpm-post-btn') !== null || attempts >= 10) {
+        return
+      }
+
+      injectProfilePostButton()
+      setTimeout(tryInject, 400) // continue
+    }
+
+    setTimeout(tryInject, 400)
+  }
+
+  function injectProfilePostButton() {
+    if (document.getElementById('xpm-post-btn') !== null) {
+      return
+    }
+
+    const primaryColumn = document.querySelector('[data-testid="primaryColumn"]')
+    if (primaryColumn === null) {
+      return
+    }
+
+    // The tab bar sits in a container just after the profile info section.
+    // Insert the Post button right before the tablist (or its nearest div parent).
+    const tabList = primaryColumn.querySelector('[role="tablist"]')
+    if (!tabList) {
+      return // wait until React renders the tab bar
+    }
+
+    const postButton = createPostButton()
     // Walk up from the tablist to find the direct child of primaryColumn's inner div,
     // then insert the Post button just before that container (= where the tabs live).
-    const inner = primaryCol.querySelector(':scope > div')
+    const inner = primaryColumn.querySelector(':scope > div')
     let anchor = tabList
     while (anchor.parentElement && anchor.parentElement !== inner) {
       anchor = anchor.parentElement
     }
-    inner.insertBefore(postBtn, anchor)
+    inner.insertBefore(postButton, anchor)
   }
 
   function removeProfilePostButton() {
-    const el = document.getElementById('xpm-post-btn')
-    if (el) {
-      el.remove()
+    const element = document.getElementById('xpm-post-btn')
+    if (element !== null) {
+      element.remove()
     }
   }
 
-  // ── Mode application ───────────────────────────────────────────────────────
-  function applyMode() {
+  function applyPostMode() {
     const pageType = getPageType()
+    document.body.classList.add('xpm-active')
 
-    // Reset page-type classes
+    if (pageType === 'home') {
+      document.body.classList.add('xpm-home')
+      removeProfilePostButton()
+    } else if (pageType === 'profile') {
+      document.body.classList.add('xpm-profile')
+      startTryingToInjectProfilePostButton()
+    } else if (pageType === 'compose') {
+      // Leave compose pages untouched
+    } else {
+      // On other pages just apply the sidebar-hiding styles
+    }
+  }
+
+  function applyOriginalMode() {
+    document.body.classList.remove('xpm-active')
+    removeProfilePostButton()
+  }
+
+  function applyMode() {
     document.body.classList.remove('xpm-home', 'xpm-profile')
 
     if (postModeActive) {
-      document.body.classList.add('xpm-active')
-
-      if (pageType === 'home') {
-        document.body.classList.add('xpm-home')
-        removeProfilePostButton()
-      } else if (pageType === 'profile') {
-        document.body.classList.add('xpm-profile')
-        // Retry until React renders the tablist (tab bar appears after profile data loads)
-        let attempts = 0
-        const tryInject = () => {
-          if (document.getElementById('xpm-post-btn')) {
-            return
-          }
-          injectProfilePostButton()
-          if (!document.getElementById('xpm-post-btn') && ++attempts < 10) {
-            setTimeout(tryInject, 400)
-          }
-        }
-        setTimeout(tryInject, 400)
-      } else if (pageType === 'compose') {
-        // Leave compose pages untouched
-      } else {
-        // On other pages just apply the sidebar-hiding styles
-      }
+      applyPostMode()
     } else {
-      document.body.classList.remove('xpm-active')
-      removeProfilePostButton()
+      applyOriginalMode()
     }
 
     updateToggleButton()
   }
 
-  // ── Mount ──────────────────────────────────────────────────────────────────
   function mount() {
-    if (!document.body) {
+    if (document.body === null) {
       return
     }
-    if (!document.getElementById('xpm-toggle-btn')) {
-      document.body.appendChild(toggleBtn)
+    if (document.getElementById('xpm-toggle-btn') === null) {
+      document.body.appendChild(toggleButton)
     }
     applyMode()
   }
 
-  if (document.body) {
+  if (document.body !== null) {
     mount()
   }
   document.addEventListener('DOMContentLoaded', mount)
 
-  // ── SPA navigation (X is a React SPA) ─────────────────────────────────────
-  let lastHref = location.href
+  function startMutationObserver() {
+    let lastHref = location.href
 
-  new MutationObserver(() => {
-    if (location.href === lastHref) {
-      return
-    }
-    lastHref = location.href
-
-    // Re-mount button and re-apply mode after React updates DOM
-    setTimeout(mount, 400)
-  }).observe(document.documentElement, { childList: true, subtree: true })
+    new MutationObserver(() => {
+      if (location.href === lastHref) {
+        return
+      }
+      lastHref = location.href
+      setTimeout(mount, 400) // Re-mount button and re-apply mode after React updates DOM
+    }).observe(document.documentElement, { childList: true, subtree: true })
+  }
+  startMutationObserver()
 })()
