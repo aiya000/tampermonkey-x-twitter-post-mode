@@ -81,6 +81,11 @@
       display: none !important;
     }
 
+    /* Mobile top nav bar (back button + title row) */
+    body.xpm-active [data-testid="TopNavBar"] {
+      display: none !important;
+    }
+
     /* Grok drawer */
     body.xpm-active [data-testid="GrokDrawer"] {
       display: none !important;
@@ -113,9 +118,12 @@
       overflow: hidden !important;
     }
 
-    /* Hide sticky column header (username + post count bar at the very top) */
-    body.xpm-active.xpm-profile [data-testid="primaryColumn"] > div > div:first-child {
-      display: none !important;
+    /* Hide sticky column header (username + post count bar at the very top).
+       On mobile the same :first-child is the profile content, so limit to desktop widths. */
+    @media (min-width: 600px) {
+      body.xpm-active.xpm-profile [data-testid="primaryColumn"] > div > div:first-child {
+        display: none !important;
+      }
     }
 
     /* Hide the tab navigation bar */
