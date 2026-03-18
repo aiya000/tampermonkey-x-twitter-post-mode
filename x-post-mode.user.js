@@ -258,10 +258,12 @@
       Post
     `
     postButton.addEventListener('click', () => {
+      // TODOO: Is this falling back really right? Should we use `throw` instead?
+
       // Try clicking the real (now hidden) compose button first,
       // fall back to navigating to /compose/tweet
       const originalButton = document.querySelector('[data-testid="SideNav_NewTweet_Button"]')
-      if (originalButton) {
+      if (originalButton instanceof HTMLElement) {
         originalButton.click()
       } else {
         location.href = '/compose/tweet'
