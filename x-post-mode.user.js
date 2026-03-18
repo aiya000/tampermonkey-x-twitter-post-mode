@@ -272,23 +272,34 @@
     return postButton
   }
 
+  /** @type {MutationObserver | null} */
+  let profileButtonObserver = null
+
   /**
-    * Retries until React renders the tablist (tab bar appears after profile data loads)
-    */
-  function startTryingToInjectProfilePostButton() {
-    let attempts = 0
-
-    const tryInject = () => {
-      attempts++
-      if (document.getElementById('xpm-post-btn') !== null || attempts >= 10) {
-        return
-      }
-
-      injectProfilePostButton()
-      setTimeout(tryInject, 400) // continue
+   * Watches the DOM and re-injects the profile post button whenever React removes it.
+   * Uses MutationObserver instead of setTimeout polling to avoid periodic layout thrashing.
+   */
+  function startWatchingProfilePostButton() {
+    if (profileButtonObserver !== null) {
+      profileButtonObserver.disconnect()
+      profileButtonObserver = null
     }
 
-    setTimeout(tryInject, 400)
+    injectProfilePostButton()
+
+    profileButtonObserver = new MutationObserver(() => {
+      if (document.getElementById('xpm-post-btn') === null) {
+        injectProfilePostButton()
+      }
+    })
+    profileButtonObserver.observe(document.body, { childList: true, subtree: true })
+  }
+
+  function stopWatchingProfilePostButton() {
+    if (profileButtonObserver !== null) {
+      profileButtonObserver.disconnect()
+      profileButtonObserver = null
+    }
   }
 
   function injectProfilePostButton() {
@@ -312,6 +323,9 @@
     // Walk up from the tablist to find the direct child of primaryColumn's inner div,
     // then insert the Post button just before that container (= where the tabs live).
     const inner = primaryColumn.querySelector(':scope > div')
+    if (inner === null) {
+      return
+    }
     let anchor = tabList
     while (anchor.parentElement && anchor.parentElement !== inner) {
       anchor = anchor.parentElement
@@ -335,7 +349,7 @@
       removeProfilePostButton()
     } else if (pageType === 'profile') {
       document.body.classList.add('xpm-profile')
-      startTryingToInjectProfilePostButton()
+      startWatchingProfilePostButton()
     } else if (pageType === 'compose') {
       // Leave compose pages untouched
     } else {
@@ -345,11 +359,13 @@
 
   function applyOriginalMode() {
     document.body.classList.remove('xpm-active')
+    stopWatchingProfilePostButton()
     removeProfilePostButton()
   }
 
   function applyMode() {
     document.body.classList.remove('xpm-home', 'xpm-profile')
+    stopWatchingProfilePostButton()
 
     if (postModeActive) {
       applyPostMode()
@@ -372,8 +388,9 @@
 
   if (document.body !== null) {
     mount()
+  } else {
+    document.addEventListener('DOMContentLoaded', mount)
   }
-  document.addEventListener('DOMContentLoaded', mount)
 
   function startMutationObserver() {
     let lastHref = location.href
