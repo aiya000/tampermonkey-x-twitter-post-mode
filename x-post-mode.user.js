@@ -165,8 +165,8 @@
       display: none !important;
     }
 
-    /* Hide timeline tweet cells, keep compose area */
-    body.xpm-active.xpm-home [data-testid="cellInnerDiv"] {
+    /* Hide timeline tweet cells, keep compose area (first cellInnerDiv) */
+    body.xpm-active.xpm-home [data-testid="cellInnerDiv"]:not(:first-child) {
       display: none !important;
     }
 
