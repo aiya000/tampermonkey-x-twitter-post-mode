@@ -4,7 +4,7 @@
   "description": "Simplify X UI to a post-only compose view, with a toggle button",
   "main": "x-post-mode.user.js",
   "scripts": {
-    "typecheck": "tsc --noEmit --allowJs --checkJs x-post-mode.user.js",
+    "typecheck": "tsc",
     "lint": "bun run eslint ; bun run prettier",
     "eslint": "eslint x-post-mode.user.js",
     "prettier": "prettier x-post-mode.user.js > /dev/null && echo 'Prettier: No issues found' || echo 'Prettier: Issues found'",
@@ -15,6 +15,7 @@
   "author": "aiya000",
   "license": "MIT",
   "devDependencies": {
+    "@types/tampermonkey": "^5.0.5",
     "eslint": "^9.39.4",
     "eslint-plugin-import-x": "^4.16.2",
     "eslint-plugin-n": "^17.24.0",
