@@ -4,6 +4,7 @@
   "description": "Simplify X UI to a post-only compose view, with a toggle button",
   "main": "x-post-mode.user.js",
   "scripts": {
+    "typecheck": "tsc --noEmit --allowJs --checkJs x-post-mode.user.js",
     "lint": "bun run eslint ; bun run prettier",
     "eslint": "eslint x-post-mode.user.js",
     "prettier": "prettier x-post-mode.user.js > /dev/null && echo 'Prettier: No issues found' || echo 'Prettier: Issues found'",
