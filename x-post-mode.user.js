@@ -395,6 +395,7 @@
         return
       }
       lastHref = location.href
+      applyMode() // Apply body classes immediately to prevent flash on navigation
       setTimeout(mount, 400) // Re-mount button and re-apply mode after React updates DOM
     }).observe(document.documentElement, { childList: true, subtree: true })
   }
