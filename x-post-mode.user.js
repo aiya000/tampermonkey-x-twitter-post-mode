@@ -158,6 +158,18 @@
       display: none !important;
     }
 
+    /* ── /compose/post specific ── */
+
+    /* Hide background timeline cells visible behind compose modal */
+    body.xpm-active.xpm-compose [data-testid="cellInnerDiv"] {
+      display: none !important;
+    }
+
+    /* Hide sticky column header behind compose modal */
+    body.xpm-active.xpm-compose [data-testid="primaryColumn"] > div > div:first-child {
+      display: none !important;
+    }
+
     /* ── /home specific ── */
 
     /* Hide sticky column header (tabs row above compose) */
@@ -346,7 +358,7 @@
       document.body.classList.add('xpm-profile')
       startWatchingProfilePostButton()
     } else if (pageType === 'compose') {
-      // Leave compose pages untouched
+      document.body.classList.add('xpm-compose')
     } else {
       // On other pages just apply the sidebar-hiding styles
     }
@@ -359,7 +371,7 @@
   }
 
   function applyMode() {
-    document.body.classList.remove('xpm-home', 'xpm-profile')
+    document.body.classList.remove('xpm-home', 'xpm-profile', 'xpm-compose')
     stopWatchingProfilePostButton()
 
     if (postModeActive) {
