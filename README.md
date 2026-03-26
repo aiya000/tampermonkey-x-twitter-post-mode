@@ -46,7 +46,7 @@ TODO
 
 | Post Mode | Original Mode |
 |---|---|
-| ![](./readme/smartphone-profile-post-mode.png) | ![](./readme/smartphone-profile-original-mode.png) |
+| <img src="./readme/smartphone-profile-post-mode.png" width="400" /> | <img src="./readme/smartphone-profile-original-mode.png" width="400" /> |
 
 #### x.com/compose/post
 
