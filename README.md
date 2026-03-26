@@ -14,12 +14,15 @@ Toggle between Post Mode and the original page with a fixed button in the bottom
 
 ## Screenshots
 
+### PC
+
 | Post Mode (`/home`) | Post Mode (`/{profile}`) |
 |---|---|
 | ![](./readme/desktop-home.png) | ![](./readme/desktop-profile.png) |
 
-Smartphone view (Post Mode on `/{profile}`):
-![](./readme/smartphone-profile.png)
+### Smartphone (Post Mode on `/{profile}`):  
+
+<img src="./readme/smartphone-profile.png" width="300" />
 
 ## Installation
 
