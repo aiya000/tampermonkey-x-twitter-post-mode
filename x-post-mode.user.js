@@ -160,13 +160,10 @@
 
     /* ── /compose/post specific ── */
 
-    /* Hide background timeline cells visible behind compose modal */
-    body.xpm-active.xpm-compose [data-testid="cellInnerDiv"] {
-      display: none !important;
-    }
-
-    /* Hide sticky column header behind compose modal */
-    body.xpm-active.xpm-compose [data-testid="primaryColumn"] > div > div:first-child {
+    /* Hide entire background — compose dialog lives in #layers (outside main),
+       so hiding main does not affect the composer itself.
+       This also prevents infinite-scroll from looping on hidden cells. */
+    body.xpm-active.xpm-compose main[role="main"] {
       display: none !important;
     }
 
