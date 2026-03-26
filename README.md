@@ -8,7 +8,7 @@ Toggle between Post Mode and the original page with a fixed button in the bottom
 
 - **`/home`** — Hides the left sidebar, right sidebar, and timeline feed. Only the compose area remains, centered and framed
 - **`/{profile}`** — Hides the left sidebar, right sidebar, tab navigation, and tweet list. Injects a **Post** button into the center column
-- **Toggle button** — Fixed at the bottom-left. Blue pen icon = Post Mode, gray list icon = Full view
+- **Toggle button** — Fixed at the bottom-left. Blue pen icon = Post Mode, gray list icon = Original Mode (Full View)
 - **Persistent state** — Mode is saved across sessions via `GM_setValue`
 - **SPA-aware** — Reacts to X's client-side navigation via `MutationObserver`
 
@@ -16,13 +16,41 @@ Toggle between Post Mode and the original page with a fixed button in the bottom
 
 ### PC
 
-| Post Mode (`/home`) | Post Mode (`/{profile}`) |
+#### x.com/home
+
+| Post Mode | Original Mode |
 |---|---|
-| ![](./readme/desktop-home.png) | ![](./readme/desktop-profile.png) |
+| ![](./readme/desktop-home-post-mode.png) | ![](./readme/desktop-home-original-mode.png) |
 
-### Smartphone (Post Mode on `/{profile}`):  
+#### x.com/{profile}
 
-<img src="./readme/smartphone-profile.png" width="300" />
+| Post Mode | Original Mode |
+|---|---|
+| ![](./readme/desktop-profile-post-mode.png) | ![](./readme/desktop-profile-original-mode.png) |
+
+#### x.com/compose/post
+
+| Post Mode | Original Mode |
+|---|---|
+| ![](./readme/desktop-compose-post-post-mode.png) | ![](./readme/desktop-compose-post-original-mode.png) |
+
+### Smartphone
+
+<!-- NOTE: Emulated iPhone 12 Pro (390x844) in Chrome DevTools -->
+
+#### x.com/home
+
+TODO
+
+#### x.com/{profile}
+
+| Post Mode | Original Mode |
+|---|---|
+| ![](./readme/smartphone-profile-post-mode.png) | ![](./readme/smartphone-profile-original-mode.png) |
+
+#### x.com/compose/post
+
+TODO
 
 ## Installation
 
@@ -37,5 +65,5 @@ Toggle between Post Mode and the original page with a fixed button in the bottom
 |---|---|
 | Visit `x.com/home` (or `twitter.com/home`) with Post Mode ON | Compose area only |
 | Visit `x.com/{profile}` (or `twitter.com/{profile}`) with Post Mode ON | Profile info + Post button |
-| Click the **blue pen button** (bottom-left) | Switch to full view |
+| Click the **blue pen button** (bottom-left) | Switch to Original Mode (Full View) |
 | Click the **gray list button** (bottom-left) | Switch back to Post Mode |
