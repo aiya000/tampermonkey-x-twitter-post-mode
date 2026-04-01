@@ -196,9 +196,17 @@
   `)
 
   const storageKey = 'x_post_mode_active'
+  const defaultPostModeActive = true
 
-  /** @type {boolean} */
-  let postModeActive = GM_getValue(storageKey, true) // default: post mode ON
+  const postMode = {
+    active: GM_getValue(storageKey, defaultPostModeActive),
+    previousActiveState: defaultPostModeActive,
+    toggleActive: () => {
+      postMode.previousActiveState = postMode.active
+      postMode.active = !postMode.active
+    },
+    isCurrentStateAndPreviousStateSame: () => postMode.active === postMode.previousActiveState,
+  }
 
   function getPageType() {
     const path = location.pathname
@@ -254,15 +262,15 @@
     button.id = 'xpm-toggle-btn'
     button.setAttribute('type', 'button')
     button.addEventListener('click', () => {
-      postModeActive = !postModeActive
-      GM_setValue(storageKey, postModeActive)
+      postMode.toggleActive()
+      GM_setValue(storageKey, postMode.active)
       applyMode()
     })
     return button
   }
 
   function updateToggleButton() {
-    if (postModeActive) {
+    if (postMode.active) {
       toggleButton.innerHTML = postModeIcon
       toggleButton.title = 'Switch to full view (currently: post mode)'
     } else {
@@ -368,10 +376,14 @@
   }
 
   function applyMode() {
+    if (postMode.isCurrentStateAndPreviousStateSame()) {
+      return
+    }
+
     document.body.classList.remove('xpm-home', 'xpm-profile', 'xpm-compose')
     stopWatchingProfilePostButton()
 
-    if (postModeActive) {
+    if (postMode.active) {
       applyPostMode()
     } else {
       applyOriginalMode()
@@ -390,23 +402,15 @@
     applyMode()
   }
 
-  if (document.body !== null) {
-    mount()
-  } else {
-    document.addEventListener('DOMContentLoaded', mount)
-  }
+  mount()
+  document.addEventListener('DOMContentLoaded', mount)
 
-  function startMutationObserver() {
-    let lastHref = location.href
-
-    new MutationObserver(() => {
-      if (location.href === lastHref) {
-        return
-      }
-      lastHref = location.href
-      applyMode() // Apply body classes immediately to prevent flash on navigation
-      setTimeout(mount, 400) // Re-mount button and re-apply mode after React updates DOM
-    }).observe(document.documentElement, { childList: true, subtree: true })
-  }
-  startMutationObserver()
+  let lastHref = location.href
+  new MutationObserver(() => {
+    if (location.href === lastHref) {
+      return
+    }
+    lastHref = location.href
+    setTimeout(mount, 1000) // Re-mount button and re-apply mode after React updates DOM
+  }).observe(document.documentElement, { childList: true, subtree: true })
 })()
